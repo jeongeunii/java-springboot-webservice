@@ -7,6 +7,9 @@
             <div class="col-md-6">
                 <a href="/posts/save" role="button" class="btn btn-primary">글 등록</a>
             </div>
+            <div class="col-md-6">
+                <a href="/posts/calendar" role="button" class="btn btn-primary">스케줄표</a>
+            </div>
         </div>
         <br>
         <!-- 목록 출력 영역 -->
@@ -23,7 +26,7 @@
             {{#posts}}
                 <tr>
                     <td>{{id}}</td>
-                    <td>{{title}}</td>
+                    <td><a href="/posts/update/{{id}}">{{title}}</a></td>
                     <td>{{author}}</td>
                     <td>{{modifiedDate}}</td>
                 </tr>
