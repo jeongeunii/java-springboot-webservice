@@ -1,4 +1,4 @@
-package com.jeuni.example.springboot.service.posts;
+package com.jeuni.example.springboot.service;
 
 import com.jeuni.example.springboot.domain.posts.Posts;
 import com.jeuni.example.springboot.domain.posts.PostsRepository;
@@ -44,5 +44,12 @@ public class PostsService {
         return postsRepository.findAllDesc().stream()
                 .map(PostsListResponseDto::new)
                 .collect(Collectors.toList());
+    }
+
+    @Transactional
+    public void delete (Long id) {
+        Posts posts = postsRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("해당 게시글이 없습니다. id=" + id));
+
+        postsRepository.delete(posts);
     }
 }

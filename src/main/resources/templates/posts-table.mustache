@@ -1,0 +1,121 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>통계</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+    <script src="https://code.jquery.com/jquery-3.3.1.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.4.0/Chart.min.js"></script>
+
+</head>
+<body>
+
+<ul class="nav nav-tabs sample-tab">
+    <li class="nav-item">
+        <a class="nav-link active" data-toggle="tab" href="#data-select">데이터 조회</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-toggle="tab" href="#data-table">통계</a>
+    </li>
+</ul>
+<div class="tab-content">
+    <div class="tab-pane fade show active" id="data-select">
+        <div class="calendar-job">
+            <!-- 목록 출력 영역 -->
+            <table class="table table-horizontal table-bordered">
+                <thead class="thead-strong">
+                <tr class="background-white">
+                    <th>업무구분</th>
+                    <th>청구일자</th>
+                    <th>서비스관리번호</th>
+                    <th>수신번호</th>
+                    <th>수납금액</th>
+                    <th>고객명</th>
+                    <th>청구서 생성여부</th>
+                    <th>청구서 발송여부</th>
+                </tr>
+                </thead>
+                <tbody id="tbody">
+                {{#tctSamComs}}
+                    <tr>
+                        <td>{{gubun_cd}}</td>
+                        <td>{{inv_dt}}</td>
+                        <td>{{svc_mgmt_num}}</td>
+                        <td>{{rcv_svc_num}}</td>
+                        <td>{{pay_amt}}</td>
+                        <td>{{cust_nm}}</td>
+                        <td>{{create_yn}}</td>
+                        <td>{{send_yn}}</td>
+                    </tr>
+                {{/tctSamComs}}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    <div class="tab-pane fade" id="data-table">
+        <div class="calendar-job div-display-bar">
+            <span id="uploadRatio" class="uploadRatio"></span>
+            <div id="uploadProgress" class="uploadProgress">
+                <div id="progressBar" class="progressBar"></div>
+            </div>
+        </div>
+        <div class="calendar-job div-display-flex">
+            <!-- 목록 출력 영역 -->
+            <table class="table table-horizontal table-bordered table-size3">
+                <thead class="thead-strong">
+                <tr class="background-white">
+                    <th>청구서 생성여부</th>
+                    <th>건수</th>
+                </tr>
+                </thead>
+                <tbody id="tbody">
+                {{#tctSamComCount}}
+                    <tr>
+                        <td>{{yn}}</td>
+                        <td>{{count}}</td>
+                    </tr>
+                {{/tctSamComCount}}
+                <tr class="background-white">
+                    <th>총 건수</th>
+                    <th>{{tctSamComTotCount}}</th>
+                </tr>
+                </tbody>
+            </table>
+            <table class="table table-horizontal table-bordered table-size3">
+                <thead class="thead-strong">
+                <tr class="background-white">
+                    <th>청구서 발송여부</th>
+                    <th>건수</th>
+                </tr>
+                </thead>
+                <tbody id="tbody">
+                {{#tctBillSoapCount}}
+                    <tr>
+                        <td>{{yn}}</td>
+                        <td>{{count}}</td>
+                    </tr>
+                {{/tctBillSoapCount}}
+                <tr class="background-white">
+                    <th>총 건수</th>
+                    <th>{{tctBillSoapTotCount}}</th>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="calendar-job div-display-barChart">
+            <canvas id="myTctSamComChart" class="barChart"></canvas>
+            <canvas id="myTctBillSoapChart" class="barChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<script src="/js/app/table.js"></script>
+
+</body>
+</html>
+
