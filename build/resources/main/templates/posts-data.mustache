@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>데이터 조회</title>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link href="https://fonts.googleapis.com/css?family=Lato:300,400,700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/css/style.css" type="text/css">
+
+</head>
+<body>
+
+    <ul class="nav nav-tabs sample-tab">
+        <li class="nav-item">
+            <a class="nav-link active" data-toggle="tab" href="#sample-select">샘플 조회</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link" data-toggle="tab" href="#sample-insert">샘플 입력</a>
+        </li>
+    </ul>
+    <div class="tab-content">
+        <div class="tab-pane fade show active" id="sample-select">
+            <div class="calendar-job">
+                <!-- 목록 출력 영역 -->
+                <table class="table table-horizontal table-bordered">
+                    <thead class="thead-strong">
+                    <tr class="background-white">
+                        <th>업무유형</th>
+                        <th>계정번호</th>
+                        <th>수신번호</th>
+                        <th>샘플발송여부</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tbody">
+                    {{#samples}}
+                        <tr>
+                            <td>{{type}}</td>
+                            <td>{{acnt_num}}</td>
+                            <td>{{rcv_num}}</td>
+                            <td>{{send_yn}}</td>
+                        </tr>
+                    {{/samples}}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        <div class="tab-pane fade" id="sample-insert">
+            <div class="calendar-job">
+                <div class="sample-textarea">
+                    <textarea class="form-control data-textarea" style="width: 500px;" rows="5"></textarea>
+                    <button class="btn btn-data-ok" id="data-ok-button">미리보기</button>
+                    <button class="btn btn-data-ok btn-data-insert" id="data-insert-button">샘플 입력</button>
+                </div>
+                <!-- 목록 출력 영역 -->
+                <table class="table table-horizontal table-bordered">
+                    <thead class="thead-strong">
+                    <tr class="background-white">
+                        <th>업무유형</th>
+                        <th>계정번호</th>
+                        <th>수신번호</th>
+                        <th>샘플발송여부</th>
+                    </tr>
+                    </thead>
+                    <tbody id="tbody-sample">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+<script src="/js/app/jquery.min.js"></script>
+<script src="/js/app/popper.js"></script>
+<script src="/js/app/bootstrap.min.js"></script>
+<script src="/js/app/main.js" ></script>
+
+</body>
+</html>
+
