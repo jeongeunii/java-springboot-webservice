@@ -1,0 +1,631 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>작업 스케줄 관리</title>
+    <link rel="stylesheet" data-th-href="@{/webjars/bootstrap/css/bootstrap.min.css}">
+    <link rel="stylesheet" data-th-href="@{/lib/fullcalendar/main.min.css}">
+    <link rel="stylesheet" data-th-href="@{/css/etc.css}">
+</head>
+
+<body>
+    <th:block data-layout-fragment="content">
+        <form name="etcScheduleCalendar" id="etcScheduleCalendar" enctype="text/html">
+            <div id="f_title2" class="ui_title">
+                <h6 class="h6-text">&nbsp;&nbsp;* 작업 스케줄 관리</h6>
+            </div>
+
+            <div id="calendar"></div>
+
+            <!-- 일정 추가 modal -->
+            <div class="modal fade" id="addEventModal" tabindex="-1" role="dialog" aria-labelledby="addEventModalTitle" aria-hidden="true">
+                <div class="modal-dialog" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="addEventModalTitle">일정 추가</h5>
+                            <button type="button" class="btn btn-light" id="closeModal">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body">
+                            <div class="form-group form-margin-bottom">
+                                <div class="add-event-form-group">
+                                    <div class="full-width">
+                                        <label for="newJobSe" class="col-form-label">업무구분</label>
+                                        <select class="form-select" id="newJobSe">
+                                            <option selected disabled value="DFT">선택해주세요.</option>
+                                            <option value="SMT">스마트폰</option>
+                                            <option value="WIT">유선 SKT</option>
+                                            <option value="WIB">유선 SKB</option>
+                                            <option value="FTR">피쳐폰</option>
+                                            <option value="TTM">단말해지미납</option>
+                                            <option value="TRM">해지후할부</option>
+                                            <option value="MVS">MVNO스마트폰</option>
+                                            <option value="TCT">무선 해지미납</option>
+                                            <option value="TCB">유선 해지미납</option>
+                                        </select>
+                                    </div>
+                                    <div class="full-width">
+                                        <label for="newTaskCode" class="col-form-label">작업구분</label>
+                                        <select class="form-select" id="newTaskCode">
+                                            <option selected disabled value="DFT">선택해주세요.</option>
+                                            <option value="CB">생성</option>
+                                            <option value="SV">발송</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="add-event-form-group">
+                                    <div class="full-width">
+                                        <label for="newTaskStartDay" class="col-form-label">작업시작일</label>
+                                        <input type="date" class="form-control" id="newTaskStartDay">
+                                    </div>
+                                    <div class="full-width">
+                                        <label for="newTaskEndDay" class="col-form-label">작업종료일</label>
+                                        <input type="date" class="form-control" id="newTaskEndDay">
+                                    </div>
+                                </div>
+                                <div class="add-event-last-form-group form-margin-bottom">
+                                    <div class="full-width">
+                                        <label for="newTaskStartTime" class="col-form-label">작업시작시간</label>
+                                        <input type="time" class="time-form form-control" id="newTaskStartTime">
+                                    </div>
+                                    <div class="full-width">
+                                        <label for="newTaskEndTime" class="col-form-label">작업종료시간</label>
+                                        <input type="time" class="time-form form-control" id="newTaskEndTime">
+                                    </div>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="newHolidayYn" value="Y">
+                                    <label for="newHolidayYn" class="form-check-label">공휴일발송여부</label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-primary" id="addEventButton">추가</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" id="closeEventModal">취소</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 일정 수정 modal -->
+            <div class="modal fade" id="updateEventModal" tabindex="-1" role="dialog" aria-labelledby="updateEventModalTitle" aria-hidden="true">
+                <div class="modal-dialog modal-xl" role="document">
+                    <div class="modal-content">
+                        <div class="modal-header">
+                            <h5 class="modal-title" id="updateEventModalTitle">일정 수정</h5>
+                            <button type="button" class="btn btn-light" id="closeModal">
+                                <span aria-hidden="true">&times;</span>
+                            </button>
+                        </div>
+                        <div class="modal-body align-center">
+                            <ul>
+                                <li id="comScheduleListNm"></li>
+                            </ul>
+                            <table class="table table-horizontal table-bordered max-width" id="scheduleTable">
+                                <thead class="thead-strong">
+                                    <tr class="background-white">
+                                        <th id="colScheSeq"><input type="checkbox" class="form-check-input" id="allScheId"></th>
+                                        <th class="display-none">스케줄순번</th>
+                                        <th class="display-none">업무구분</th>
+                                        <th class="display-none">작업코드</th>
+                                        <th>작업시작일</th>
+                                        <th>작업종료일</th>
+                                        <th id="colTaskStartTime">작업시작시간</th>
+                                        <th id="colTaskEndTime">작업종료시간</th>
+                                        <th>공휴일작업여부</th>
+                                        <th id="colJobStatus">진행상태</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body-schedule">
+                                </tbody>
+                            </table>
+
+                            <ul>
+                                <li id="batchJobListNm"></li>
+                            </ul>
+                            <table class="table table-horizontal table-bordered max-width" id="batchJobTable">
+                                <thead class="thead-strong thead-grey">
+                                    <tr class="background-white">
+                                        <th>시작시간</th>
+                                        <th>종료시간</th>
+                                        <th>대상건수</th>
+                                        <th>작업건수</th>
+                                        <th>진행상태</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body-batch-job">
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-danger display-left" id="removeEventButton">삭제</button>
+                            <button type="button" class="btn btn-primary" id="updateEventButton">수정</button>
+                            <button type="button" class="btn btn-secondary" data-dismiss="modal" id="closeEventModal"></button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </th:block>
+
+    <th:block data-layout-fragment="js">
+        <script data-th-src="@{/webjars/bootstrap/js/bootstrap.min.js}"></script>
+        <script data-th-src="@{/lib/fullcalendar/main.min.js}"></script>
+        <script data-th-src="@{/lib/fullcalendar/locales-all.min.js}"></script>
+        <script data-th-src="@{/js/common.js}"></script>
+        <script>
+            var calendar = null;
+            var taskStartDay = "";
+            var taskEndDay = "";
+
+            document.addEventListener('DOMContentLoaded', function () {
+                $(function () {
+                    $.ajax({
+                        url: "/etc/getEtcScheduleListByJob",
+                        type: "GET",
+                        dataType: "json",
+                        async: false
+                    }).done(function (data) {
+                        const calendarEl = document.getElementById('calendar');
+                        calendar = new FullCalendar.Calendar(calendarEl, {
+                            initialView: 'dayGridMonth',
+                            //navLinks: true, // 일자를 클릭하면 일별 일정 내용 보기 가능
+                            events: data,
+                            headerToolbar: {
+                                left: 'setNewEventButton addEventButton',
+                                center: 'title',
+                                right: 'today prevYear,prev,next,nextYear'
+                            },
+                            customButtons: {
+                                addEventButton: {
+                                    text: "일정 추가"
+                                },
+                                setNewEventButton: {
+                                    text: "월초 스케줄 세팅"
+                                }
+                            },
+                            eventClick: function (info) {
+                                if (info.event.extendedProps.code == 'holiday') {
+                                    console.log('holiday');
+                                    return;
+                                }
+                                const jobTitle = info.event.title;
+                                const taskIndex = jobTitle.indexOf("-");
+                                const statusIndex = jobTitle.indexOf("[");
+                                const statusEndIndex = jobTitle.indexOf("]");
+
+                                const jobSeKor = jobTitle.slice(0, taskIndex - 1);
+                                const taskCodeKor = jobTitle.slice(taskIndex + 2, statusIndex - 1);
+                                const status = jobTitle.slice(statusIndex + 1, statusEndIndex);
+
+                                const jobSeVal = Object.entries(MbillObj.constants.JobSeKor).find(([key, value]) => value == jobSeKor)[0];
+                                const taskCodeVal = Object.entries(MbillObj.constants.TaskCodeKor).find(([key, value]) => value == taskCodeKor)[0];
+                                const startDate = info.event.extendedProps.taskStartDay;
+                                const endDate = info.event.extendedProps.taskEndDay;
+
+                                $.ajax({
+                                    url: "/etc/getComScheduleListByDay",
+                                    type: "GET",
+                                    dataType: "json",
+                                    contentType: "application/json; charset=utf-8",
+                                    data: {jobSe: jobSeVal, taskCode: taskCodeVal, taskStartDay: startDate, taskEndDay: endDate},
+                                    async: false
+                                }).done(function (data) {
+                                    var jobData = "";
+                                    $("#table-body-schedule").empty();
+                                    $("#comScheduleListNm").text(jobSeKor + " " + taskCodeKor + " 일정");
+                                    init_modal();
+
+                                    if (status == '-') {
+                                        $("#colScheSeq").show();
+                                        $("#colJobStatus").show();
+                                        $("#batchJobListNm").hide();
+                                        $("#batchJobTable").hide();
+                                        $("#updateEventButton").show();
+                                        $("#removeEventButton").show();
+                                        $("h5#updateEventModalTitle").text("일정 수정");
+                                    } else {
+                                        $("#colScheSeq").hide();
+                                        $("#colJobStatus").hide();
+                                        $("#batchJobListNm").show();
+                                        $("#batchJobTable").show();
+                                        $("#updateEventButton").hide();
+                                        $("#removeEventButton").hide();
+                                        $("h5#updateEventModalTitle").text("작업 결과");
+                                    }
+
+                                    if (taskCodeVal == MbillObj.constants.taskCode.CREATE_BILL) {
+                                        $("#colTaskStartTime").hide();
+                                        $("#colTaskEndTime").hide();
+                                    } else {
+                                        $("#colTaskStartTime").show();
+                                        $("#colTaskEndTime").show();
+                                    }
+
+                                    $.each(data, function (key, value) {
+                                        const checkYn = value.holidayYn == 'Y' ? "checked" : "";
+                                        var jobDataOfScheSeq = "";
+                                        var jobDataOfScheSn = "";
+                                        var jobDataOfJobSe = "";
+                                        var jobDataOfTaskCode = "";
+                                        var jobDataOfTaskStartDay = "";
+                                        var jobDataOfTaskEndDay = "";
+                                        var jobDataOfTaskStartTime = "";
+                                        var jobDataOfTaskEndTime = "";
+                                        var jobDataOfHolidayYn = "";
+                                        var jobDataOfJobStatus = "";
+
+                                        if (status == '-') {
+                                            jobDataOfScheSeq = "<td class='align-middle'><input class='form-check-input' type='checkbox' name='scheSeq' value='" + value.scheSeq + "'></td>";
+                                            jobDataOfScheSn = "<td class='display-none'><input type='text' name='scheSn' value='" + value.scheSn + "'></td>";
+                                            jobDataOfJobSe = "<td class='display-none'><input type='text' name='jobSe' value='" + jobSeVal + "'></td>";
+                                            jobDataOfTaskCode = "<td class='display-none'><input type='text' name='taskCode' value='" + taskCodeVal + "'></td>";
+                                            jobDataOfTaskStartDay = "<td><input type='date' class='form-control' name='taskStartDay' value='" + getCalendarFormatDate(value.taskStartDay) + "'></td>";
+                                            jobDataOfTaskEndDay = "<td><input type='date' class='form-control' name='taskEndDay' value='" + getCalendarFormatDate(value.taskEndDay) + "'></td>";
+                                            jobDataOfTaskStartTime = "<td><input type='time' class='form-control' name='taskStartTime' value='" + getCalendarFormatTime(value.taskStartTime) + "'></td>";
+                                            jobDataOfTaskEndTime = "<td><input type='time' class='form-control' name='taskEndTime' value='" + getCalendarFormatTime(value.taskEndTime) + "'></td>";
+                                            jobDataOfHolidayYn = "<td class='align-middle'><input class='form-check-input' type='checkbox' name='holidayYn' value='" + value.holidayYn + "' " + checkYn + "></td>";
+                                            jobDataOfJobStatus = "<td class='align-middle'>진행전</td>";
+                                        } else {
+                                            jobDataOfTaskStartDay = "<td class='align-middle' id='taskStartDay'>" + value.taskStartDay + "</td>";
+                                            jobDataOfTaskEndDay = "<td class='align-middle' id='taskEndDay'>" + value.taskEndDay + "</td>";
+                                            jobDataOfTaskStartTime = "<td class='align-middle' id='taskStartTime'>" + value.taskStartTime + "</td>";
+                                            jobDataOfTaskEndTime = "<td class='align-middle' id='taskEndTime'>" + value.taskEndTime + "</td>";
+                                            jobDataOfHolidayYn = "<td class='align-middle' id='holidayYn'>" + value.holidayYn + "</td>";
+
+                                            $.ajax({
+                                                url: "/etc/getBatchJobListByDay",
+                                                type: "GET",
+                                                dataType: "json",
+                                                contentType: "application/json; charset=utf-8",
+                                                data: {jobSe: jobSeVal, taskCode: taskCodeVal, taskStartDay: startDate},
+                                                async: false
+                                            }).done(function (data) {
+                                                var batchData = "";
+                                                $("#table-body-batch-job").empty();
+                                                $("#batchJobListNm").text(jobSeKor + " " + taskCodeKor + " 작업 이력");
+
+                                                $.each(data, function (key, value) {
+                                                    batchData = "<tr>";
+                                                    batchData += "<td class='align-middle'>" + value.taskStartDtm + "</td>";
+                                                    batchData += "<td class='align-middle'>" + value.taskEndDtm + "</td>";
+                                                    batchData += "<td class='align-middle'>" + value.targetCnt + "</td>";
+                                                    batchData += "<td class='align-middle'>" + value.workCnt + "</td>";
+                                                    batchData += "<td class='align-middle'>" + value.taskStatus + "</td></tr>";
+
+                                                    $("#table-body-batch-job").append(batchData);
+                                                });
+                                            });
+                                        }
+
+                                        if (taskCodeVal == MbillObj.constants.taskCode.CREATE_BILL) {
+                                            jobDataOfTaskStartTime = "";
+                                            jobDataOfTaskEndTime = "";
+                                        }
+
+                                        jobData = "<tr>";
+                                        jobData += jobDataOfScheSeq;
+                                        jobData += jobDataOfScheSn;
+                                        jobData += jobDataOfJobSe;
+                                        jobData += jobDataOfTaskCode;
+                                        jobData += jobDataOfTaskStartDay;
+                                        jobData += jobDataOfTaskEndDay;
+                                        jobData += jobDataOfTaskStartTime;
+                                        jobData += jobDataOfTaskEndTime;
+                                        jobData += jobDataOfHolidayYn;
+                                        jobData += jobDataOfJobStatus + "</tr>";
+
+                                        $("#table-body-schedule").append(jobData);
+
+                                        checkbox_bind_event();
+                                    });
+                                });
+
+                                $("#updateEventModal").modal("show");
+                            },
+                            select: function (info) {
+                                taskStartDay = info.startStr;
+                                taskEndDay = getYesterday(info.endStr);
+                            },
+                            eventDrop: function (info) {
+                                if (info.event.extendedProps.code == 'holiday') {
+                                    console.log('holiday');
+                                    info.revert();
+                                    return;
+                                }
+
+                                const jobTitle = info.event.title;
+                                const taskIndex = jobTitle.indexOf("-");
+                                const statusIndex = jobTitle.indexOf("[");
+
+                                const dayUpdateData = {
+                                    jobSe: Object.entries(MbillObj.constants.JobSeKor).find(([key, value]) => value == jobTitle.slice(0, taskIndex - 1))[0],
+                                    taskCode: Object.entries(MbillObj.constants.TaskCodeKor).find(([key, value]) => value == jobTitle.slice(taskIndex + 2, statusIndex - 1))[0],
+                                    taskStartDay: info.event.startStr.replace(/-/g, ''),
+                                    oldTaskStartDay: info.event.extendedProps.taskStartDay,
+                                    oldTaskEndDay: info.event.extendedProps.taskEndDay
+                                }
+
+                                $.ajax({
+                                    url: "/etc/modifyEtcScheduleDay",
+                                    type: "PUT",
+                                    contentType: "application/json; charset=utf-8",
+                                    data: JSON.stringify(dayUpdateData),
+                                    async: false
+                                }).done(function (data) {
+                                    if (data == 1) {
+                                        console.log('날짜 수정 : ' + dayUpdateData.taskStartDay);
+                                    } else if (data == 0) {
+                                        info.revert();
+                                        alert("진행중 또는 완료된 일정입니다.");
+                                    }
+                                }).fail(function (error) {
+                                    alert(JSON.stringify(error));
+                                });
+
+                                window.location.href = "/etc/etcScheduleCalendar";
+                            },
+                            buttonText: {
+                                today: "오늘"
+                            },
+                            editable: true, // false로 변경 시 draggable 작동 X
+                            selectable: true, // date 클릭 시 startStr, endStr 받아옴
+                            locale: "ko", // 한글 설정
+                            expandRows: true, // 화면에 맞게 높이 재설정
+                            showNonCurrentDates: false // 전월, 익월 일정 표시 X
+                        });
+
+                        calendar.render();
+
+                        bind_event();
+
+                        $(".fc-setNewEventButton-button").css({
+                            'background-color': 'rgb(59 83 107 / 87%)',
+                            'border-color': 'rgb(59 83 107 / 87%)'
+                        });
+                    });
+                });
+            });
+
+            function init_modal() {
+                $("#newJobSe").val(MbillObj.constants.JobSeKor.DFT);
+                $("#newTaskCode").val(MbillObj.constants.TaskCodeKor.DFT);
+                $("#newTaskStartDay").val(taskStartDay);
+                $("#newTaskEndDay").val(taskEndDay);
+                $("#newTaskStartTime").val("");
+                $("#newTaskEndTime").val("");
+                $("input:checkbox[id=newHolidayYn]").prop("checked", false);
+                $("input:checkbox[id=allScheId]").prop("checked", false);
+            }
+
+            function hide_modal() {
+                $("#addEventModal").modal("hide");
+                $("#updateEventModal").modal("hide");
+                taskStartDay = "";
+                taskEndDay = "";
+            }
+
+            function getYesterday(value) {
+                const date = new Date(value);
+                const year = date.getFullYear();
+                const month = ("0" + ((date.getDate() == 1) ? date.getMonth() : (date.getMonth() + 1))).slice(-2);
+                const day = ("0" + date.getDate(date.setDate(date.getDate() - 1))).slice(-2);
+
+                return `${year}-${month}-${day}`;
+            }
+
+            function getCalendarFormatDate(value) {
+                return value ? value.slice(0, 4) + '-' + value.slice(4, 6) + '-' + value.slice(6, 8) : "";
+            }
+
+            function getCalendarFormatTime(value) {
+                return value ? value.slice(0, 2) + ':' + value.slice(2, 4) + ':' + value.slice(4, 6) : "";
+            }
+
+            function checkbox_bind_event() {
+                $("#allScheId").click(function () {
+                    const total = $("input:checkbox[name=scheSeq]");
+                    $("input:checkbox[name=scheSeq]").prop("checked", $("input:checkbox[id=allScheId]").is(":checked") ? true : false);
+                });
+
+                $("input[name=scheSeq]").click(function () {
+                    const total = $("input:checkbox[name=scheSeq]").length;
+                    const checked = $("input:checkbox[name=scheSeq]:checked").length;
+
+                    $("input:checkbox[id=allScheId]").prop("checked", total == checked ? true : false);
+                });
+            }
+
+            function getCalYearMonth() {
+                const calDate = $(".fc-toolbar-title").text();
+                const yearIndex = calDate.indexOf("년");
+                const monthIndex = calDate.indexOf("월");
+                const calMonth = calDate.slice(yearIndex + 2, monthIndex);
+                const calYearMonth = calDate.slice(0, yearIndex) + ("0" + calMonth).slice(-2);
+
+                return calYearMonth;
+            }
+
+            function getCurrYearMonth() {
+                const date = new Date();
+                const year = date.getFullYear();
+                const month = ("0" + (date.getMonth() + 1)).slice(-2);
+
+                return year + month;
+            }
+
+            function bind_event() {
+                $("#closeModal, #closeEventModal").click(function () {
+                    hide_modal();
+                    init_modal();
+                });
+
+                $(".fc-setNewEventButton-button").click(function () {
+                    $.ajax({
+                        url: "/etc/setNewMonthSchedule/" + getCalYearMonth(),
+                        type: "POST",
+                        async: false
+                    }).done(function (data) {
+                        if (data == 1) {
+                            alert("월초 스케줄 세팅이 완료되었습니다.");
+                            window.location.href = "/etc/etcScheduleCalendar";
+                        } else if (data == 2) {
+                            alert("해당 월은 이미 세팅이 완료되었습니다.");
+                        } else if (data == 0) {
+                            alert("작업 당월에 스케줄 세팅을 해주세요.");
+                        }
+                    }).fail(function (error) {
+                        alert(JSON.stringify(error));
+                    });
+                });
+
+                $(".fc-addEventButton-button").click(function () {
+                    if (getCalYearMonth() == getCurrYearMonth()) {
+                        init_modal();
+                        $("#addEventModal").modal("show");
+                    } else {
+                        alert("작업 당월에만 일정 추가가 가능합니다.");
+                    }
+                });
+
+                $("#addEventButton").click(function () {
+                    const jobName = $("#newJobSe option:selected").val();
+                    const taskCode = $("#newTaskCode option:selected").val();
+                    const taskStartDay = $("#newTaskStartDay").val();
+                    const taskEndDay = $("#newTaskEndDay").val();
+                    const taskStartTime = $("#newTaskStartTime").val();
+                    const taskEndTime = $("#newTaskEndTime").val();
+                    const holidayYn = $("input:checkbox[id=newHolidayYn]").is(":checked") ? 'Y' : 'N';
+
+                    if (jobName == MbillObj.constants.jobSeKor.DFT) {
+                        alert("업무를 선택하세요.");
+                    } else if (taskCode == MbillObj.constants.taskCodeKor.DFT) {
+                        alert("처리코드를 선택하세요.");
+                    } else if (!taskStartDay) {
+                        alert("작업시작일을 선택하세요.");
+                    } else if (taskStartDay.replace(/-/g, '').slice(0, 6) != getCurrYearMonth()) {
+                        alert("당월 날짜를 선택하세요.");
+                    } else if (!taskEndDay) {
+                        alert("작업종료일을 선택하세요.");
+                    } else if (taskStartDay != taskEndDay) {
+                        alert("작업시작일과 작업종료일이 일치하지 않습니다.");
+                    } else if (taskCode == MbillObj.constants.taskCode.SEND_VMG && !taskStartTime) {
+                        alert("작업시작시간을 선택하세요.");
+                    } else if (taskCode == MbillObj.constants.taskCode.SEND_VMG && !taskEndTime) {
+                        alert("작업종료시간을 선택하세요.");
+                    } else if (taskCode == MbillObj.constants.taskCode.SEND_VMG && (taskStartTime > taskEndTime)) {
+                        alert("작업종료시간을 작업시작시간 이후로 선택해주세요.");
+                    } else {
+                        const insertData = {
+                            jobSe: jobName,
+                            taskCode: taskCode,
+                            taskStartDay: taskStartDay.replace(/-/g, ''),
+                            taskEndDay: taskEndDay.replace(/-/g, ''),
+                            taskStartTime: taskStartTime.replace(/:/g, '') + '00',
+                            taskEndTime: taskEndTime.replace(/:/g, '') + '00',
+                            holidayYn: holidayYn
+                        }
+
+                        $.ajax({
+                            url: "/etc/insertEtcSchedule",
+                            type: "POST",
+                            contentType: "application/json; charset=utf-8",
+                            data: JSON.stringify(insertData),
+                            async: false
+                        }).done(function () {
+                            console.log('신규 등록 : ' + insertData.jobSe);
+                        }).fail(function (error) {
+                            alert(JSON.stringify(error));
+                        });
+
+                        hide_modal();
+                        init_modal();
+
+                        window.location.href = "/etc/etcScheduleCalendar";
+                    }
+                });
+
+                $("#updateEventButton").click(function () {
+                    var isValidated = false;
+
+                    if ($("input:checkbox[name=scheSeq]:checked").length == 0) {
+                        alert("수정 대상을 선택해주세요.");
+                        return;
+                    }
+
+                    $("input:checkbox[name=scheSeq]:checked").each(function () {
+                        isValidated = false;
+                        var updateData = {
+                            scheSeq : $(this).val(),
+                            scheSn: $(this).parents("tr").find("input[name=scheSn]").val(),
+                            jobSe: $(this).parents("tr").find("input[name=jobSe]").val(),
+                            taskCode: $(this).parents("tr").find("input[name=taskCode]").val(),
+                            taskStartDay: $(this).parents("tr").find("input[name=taskStartDay]").val().replace(/-/g, ''),
+                            taskEndDay: $(this).parents("tr").find("input[name=taskEndDay]").val().replace(/-/g, ''),
+                            taskStartTime: "",
+                            taskEndTime: "",
+                            holidayYn: $(this).parents("tr").find("input[name=holidayYn]").is(":checked") ? 'Y' : 'N'
+                        }
+
+                        if (updateData.taskCode == MbillObj.constants.taskCode.SEND_VMG) {
+                            updateData.taskStartTime = $(this).parents("tr").find("input[name=taskStartTime]").val().replace(/:/g, '').slice(0, 4) + "00",
+                            updateData.taskEndTime = $(this).parents("tr").find("input[name=taskEndTime]").val().replace(/:/g, '').slice(0, 4) + "00"
+                        }
+
+                        if (updateData.taskStartDay != updateData.taskEndDay) {
+                            alert("작업시작일과 작업종료일이 일치하지 않습니다.");
+                        } else if (updateData.taskCode == MbillObj.constants.taskCode.SEND_VMG && (updateData.taskStartTime > updateData.taskEndTime)) {
+                            alert("작업종료시간을 작업시작시간 이후로 선택해주세요.");
+                        } else {
+                            isValidated = true;
+                            $.ajax({
+                                url: "/etc/modifyEtcSchedule",
+                                type: "PUT",
+                                contentType: "application/json; charset=utf-8",
+                                data: JSON.stringify(updateData),
+                                async: false
+                            }).done(function () {
+                                console.log('일정 수정 : ' + updateData.scheSeq);
+                            }).fail(function (error) {
+                                alert(JSON.stringify(error));
+                            });
+                        }
+                    });
+
+                    if(isValidated) window.location.href = "/etc/etcScheduleCalendar";
+                });
+
+                $("#removeEventButton").click(function () {
+                    if ($("input:checkbox[name=scheSeq]:checked").length == 0) {
+                        alert('삭제 대상을 선택해주세요.');
+                        return;
+                    }
+
+                    $("input:checkbox[name=scheSeq]:checked").each(function () {
+                        const deleteData = {
+                            scheSeq: $(this).val(),
+                            scheSn: $(this).parents("tr").find("input[name=scheSn]").val(),
+                            taskCode: $(this).parents("tr").find("input[name=taskCode]").val()
+                        }
+
+                        $.ajax({
+                            url: "/etc/removeEtcSchedule",
+                            type: "DELETE",
+                            contentType: "application/json; charset=utf-8",
+                            data: JSON.stringify(deleteData),
+                            async: false
+                        }).done(function () {
+                            console.log('일정 삭제 : ' + deleteData.scheSeq);
+                        }).fail(function (error) {
+                            alert(JSON.stringify(error));
+                        });
+                    });
+
+                    window.location.href = "/etc/etcScheduleCalendar";
+                });
+            }
+
+        </script>
+    </th:block>
+</body>
+</html>
