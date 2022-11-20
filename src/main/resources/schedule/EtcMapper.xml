@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jeuni.example.springboot.schedule.EtcMapper">
+
+    <!-- 월초 생성 일정 신규 등록 -->
+    <insert id="insertNewMonthCBSchedule" parameterType="com.jeuni.example.springboot.schedule.EtcScheduleMainDto">
+        INSERT INTO TABLE
+            (COL1, COL2, COL3)
+        VALUES
+            ('V', #{jobSe}, #{taskCode})
+    </insert>
+
+    <!-- 월초 발송 일정 수정 -->
+    <update id="modifyNewMonthSVSchedule" parameterType="com.jeuni.example.springboot.schedule.EtcScheduleMainDto">
+        UPDATE TABLE1,
+            (SELECT COL1
+            FROM TABLE2
+            WHERE COL2 = #{jobSe} AND COL3 LIKE CONCAT(DATE_FORMAT(NOW(), '%Y%m'), '%')) S
+        SET COL4 = #{taskStartDay}
+        WHERE COL5 = COL6
+    </update>
+
+    <!-- 이번달 발송 일정 일별 목록 조회 - 원부 테이블 -->
+    <select id="selectComSVScheduleListByDay" parameterType="com.jeuni.example.springboot.schedule.EtcScheduleByDayDto"
+        resultType="com.jeuni.example.springboot.schedule.EtcScheduleCalendarComVO">
+        SELECT COL1, COL2, COL3
+        FROM TABLE1 JOIN TABLE2
+        ON COL4 = COL5
+        WHERE COL6 = #{jobSe}
+        GROUP BY COL1
+        ORDER BY COL2
+    </select>
+
+    <!-- 생성/발송 일정 삭제 -->
+    <delete id="removeEtcSchedule" parameterType="com.jeuni.example.springboot.schedule.EtcScheduleMainDto">
+        DELETE FROM TABLE
+        WHERE COL = #{scheSeq}
+    </delete>
+</mapper>
