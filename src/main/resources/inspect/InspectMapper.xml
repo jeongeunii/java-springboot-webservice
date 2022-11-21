@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.jeuni.example.springboot.schedule.InspectMapper">
+
+    <!-- useGeneratedKeys : insert 된 데이터의 자동생성(auto_incre) key 값을 리턴 받을 수 있음
+         keyProperty : 리턴 된 key 값이 저장될 필드명 -->
+    <insert id="insertInspectInfo" useGeneratedKeys="true" keyProperty="hstSeq" parameterType="com.jeuni.example.springboot.inspect.InspectMainDto">
+        INSERT INTO TABLE
+        (COL1, COL2, COL3)
+        VALUES
+        ('I', #{jobSe}, #{taskCode})
+    </insert>
+
+    <!-- 같은 객체(inspectMainDto)를 공유하고 있다면 위에서 자동생성되어 insert 된 hstSeq 값 get하여 사용 가능 -->
+    <update id="updateInspectResult" parameterType="com.jeuni.example.springboot.inspect.InspectMainDto">
+        UPDATE TABLE1
+        SET COL1 = #{jobSe}
+        WHERE HST_SEQ = #{hstSeq}
+    </update>
+</mapper>
